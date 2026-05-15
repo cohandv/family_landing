@@ -1,0 +1,6 @@
+services:
+  family-landing:
+    build: .
+    ports:
+      - "3010:80"
+    restart: unless-stopped
