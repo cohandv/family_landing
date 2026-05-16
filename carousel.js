@@ -5,6 +5,15 @@ window.FamilyCarousel = (function () {
   var INTERVAL_MS = 5000;
   var SWIPE_THRESHOLD = 40;
   var timers = new Map();
+  var bindings = new Map();
+
+  function debounce(fn, delay) {
+    var timeoutId = null;
+    return function () {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(fn, delay);
+    };
+  }
 
   function prefersReducedMotion() {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -134,6 +143,11 @@ window.FamilyCarousel = (function () {
       entry.stop();
     });
     timers.clear();
+
+    bindings.forEach(function (entry) {
+      entry.cleanup();
+    });
+    bindings.clear();
   }
 
   function maxViewportHeight() {
@@ -154,7 +168,10 @@ window.FamilyCarousel = (function () {
       if (!width) return;
       var height = (active.naturalHeight / active.naturalWidth) * width;
       height = Math.min(Math.max(height, 200), maxViewportHeight());
-      viewport.style.height = height + "px";
+      var nextHeight = Math.round(height) + "px";
+      if (viewport.style.height !== nextHeight) {
+        viewport.style.height = nextHeight;
+      }
     }
 
     if (active.complete) apply();
@@ -182,9 +199,23 @@ window.FamilyCarousel = (function () {
       });
     });
 
-    window.addEventListener("resize", function () {
+    var scheduleFit = debounce(function () {
       fitViewportToActiveSlide(viewport);
-    });
+    }, 100);
+
+    var resizeObserver = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(scheduleFit);
+      resizeObserver.observe(viewport);
+    } else {
+      window.addEventListener("resize", scheduleFit);
+    }
+
+    function cleanup() {
+      stopAutoplay();
+      if (resizeObserver) resizeObserver.disconnect();
+      else window.removeEventListener("resize", scheduleFit);
+    }
 
     function goTo(nextIndex) {
       slides[index].classList.remove("is-active");
@@ -203,7 +234,10 @@ window.FamilyCarousel = (function () {
 
     fitViewportToActiveSlide(viewport);
 
-    if (slides.length <= 1) return;
+    if (slides.length <= 1) {
+      bindings.set(el, { cleanup: cleanup });
+      return;
+    }
 
     function step(delta) {
       goTo(index + delta);
@@ -309,6 +343,7 @@ window.FamilyCarousel = (function () {
 
     startAutoplay();
     timers.set(el, { stop: stopAutoplay });
+    bindings.set(el, { cleanup: cleanup });
   }
 
   function initAll(root) {

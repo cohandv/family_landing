@@ -316,9 +316,12 @@
       .then(function (data) {
         window.FAMILY_IMAGE_MANIFEST = data;
       })
-      .catch(function () {
+      .catch(function (err) {
         window.FAMILY_IMAGE_MANIFEST = { albums: {} };
-        console.warn("images/manifest.json not found — run: node scripts/generate-manifest.js");
+        console.error(
+          "[family-landing] Could not load images/manifest.json — run: npm run manifest",
+          err
+        );
       });
   }
 
