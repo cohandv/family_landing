@@ -1,2 +1,5 @@
-/images/manifest.json
+/about/*
+  Cache-Control: public, max-age=3600
+
+/about/images/manifest.json
   Cache-Control: no-store
