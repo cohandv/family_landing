@@ -247,6 +247,8 @@ a {
   outline: none;
   width: 100%;
   min-height: 12rem;
+  aspect-ratio: var(--slide-ar, 4 / 5);
+  max-height: min(calc(100dvh - var(--header-h) - 6rem), 56rem);
   display: flex;
   align-items: center;
   justify-content: center;

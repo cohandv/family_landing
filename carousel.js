@@ -1,19 +1,12 @@
 /**
- * Image carousels from images/manifest.json — original colors, swipe & scroll navigation.
+ * Image carousels from images/manifest.json — no setTimeout/setInterval (CSP-safe timers).
  */
 window.FamilyCarousel = (function () {
   var INTERVAL_MS = 5000;
   var SWIPE_THRESHOLD = 40;
   var timers = new Map();
   var bindings = new Map();
-
-  function debounce(fn, delay) {
-    var timeoutId = null;
-    return function () {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(fn, delay);
-    };
-  }
+  var resizeRafId = null;
 
   function prefersReducedMotion() {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -138,6 +131,27 @@ window.FamilyCarousel = (function () {
     );
   }
 
+  function fitViewportToActiveSlide(viewport) {
+    var active = viewport.querySelector(".carousel__slide.is-active");
+    if (!active || !active.naturalWidth) return;
+    viewport.style.setProperty(
+      "--slide-ar",
+      active.naturalWidth + " / " + active.naturalHeight
+    );
+  }
+
+  function refitAllViewports() {
+    document.querySelectorAll(".carousel__viewport").forEach(fitViewportToActiveSlide);
+  }
+
+  function scheduleRefitAll() {
+    if (resizeRafId !== null) return;
+    resizeRafId = requestAnimationFrame(function () {
+      resizeRafId = null;
+      refitAllViewports();
+    });
+  }
+
   function destroyAll() {
     timers.forEach(function (entry) {
       entry.stop();
@@ -148,34 +162,11 @@ window.FamilyCarousel = (function () {
       entry.cleanup();
     });
     bindings.clear();
-  }
 
-  function maxViewportHeight() {
-    var headerH =
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue("--header-h")
-      ) || 64;
-    return Math.max(240, window.innerHeight - headerH - 96);
-  }
-
-  function fitViewportToActiveSlide(viewport) {
-    var active = viewport.querySelector(".carousel__slide.is-active");
-    if (!active) return;
-
-    function apply() {
-      if (!active.naturalWidth) return;
-      var width = viewport.clientWidth;
-      if (!width) return;
-      var height = (active.naturalHeight / active.naturalWidth) * width;
-      height = Math.min(Math.max(height, 200), maxViewportHeight());
-      var nextHeight = Math.round(height) + "px";
-      if (viewport.style.height !== nextHeight) {
-        viewport.style.height = nextHeight;
-      }
+    if (resizeRafId !== null) {
+      cancelAnimationFrame(resizeRafId);
+      resizeRafId = null;
     }
-
-    if (active.complete) apply();
-    else active.addEventListener("load", apply, { once: true });
   }
 
   function bindCarousel(el) {
@@ -188,7 +179,8 @@ window.FamilyCarousel = (function () {
     var dots = el.querySelectorAll(".carousel__dot");
     var prevBtn = el.querySelector(".carousel__btn--prev");
     var nextBtn = el.querySelector(".carousel__btn--next");
-    var timerId = null;
+    var autoplayRafId = null;
+    var autoplayLastTick = 0;
     var touchStartX = null;
 
     slides.forEach(function (slide) {
@@ -198,24 +190,6 @@ window.FamilyCarousel = (function () {
         }
       });
     });
-
-    var scheduleFit = debounce(function () {
-      fitViewportToActiveSlide(viewport);
-    }, 100);
-
-    var resizeObserver = null;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(scheduleFit);
-      resizeObserver.observe(viewport);
-    } else {
-      window.addEventListener("resize", scheduleFit);
-    }
-
-    function cleanup() {
-      stopAutoplay();
-      if (resizeObserver) resizeObserver.disconnect();
-      else window.removeEventListener("resize", scheduleFit);
-    }
 
     function goTo(nextIndex) {
       slides[index].classList.remove("is-active");
@@ -234,6 +208,37 @@ window.FamilyCarousel = (function () {
 
     fitViewportToActiveSlide(viewport);
 
+    function stopAutoplay() {
+      if (autoplayRafId !== null) {
+        cancelAnimationFrame(autoplayRafId);
+        autoplayRafId = null;
+      }
+    }
+
+    function autoplayFrame(now) {
+      if (now - autoplayLastTick >= interval) {
+        autoplayLastTick = now;
+        goTo(index + 1);
+      }
+      autoplayRafId = requestAnimationFrame(autoplayFrame);
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      if (prefersReducedMotion() || slides.length <= 1) return;
+      autoplayLastTick = performance.now();
+      autoplayRafId = requestAnimationFrame(autoplayFrame);
+    }
+
+    function restartAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    function cleanup() {
+      stopAutoplay();
+    }
+
     if (slides.length <= 1) {
       bindings.set(el, { cleanup: cleanup });
       return;
@@ -242,26 +247,6 @@ window.FamilyCarousel = (function () {
     function step(delta) {
       goTo(index + delta);
       restartAutoplay();
-    }
-
-    function stopAutoplay() {
-      if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-    }
-
-    function startAutoplay() {
-      stopAutoplay();
-      if (prefersReducedMotion()) return;
-      timerId = setInterval(function () {
-        goTo(index + 1);
-      }, interval);
-    }
-
-    function restartAutoplay() {
-      stopAutoplay();
-      startAutoplay();
     }
 
     dots.forEach(function (dot) {
@@ -346,10 +331,18 @@ window.FamilyCarousel = (function () {
     bindings.set(el, { cleanup: cleanup });
   }
 
+  var resizeListenerBound = false;
+
   function initAll(root) {
     destroyAll();
     var scope = root || document;
     scope.querySelectorAll(".carousel[data-carousel]").forEach(bindCarousel);
+
+    if (!resizeListenerBound) {
+      window.addEventListener("resize", scheduleRefitAll);
+      resizeListenerBound = true;
+    }
+    scheduleRefitAll();
   }
 
   return {
