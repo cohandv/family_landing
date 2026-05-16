@@ -1,40 +1,40 @@
 {
-  "generatedAt": "2026-05-16T15:58:39.912Z",
+  "generatedAt": "2026-05-16T16:31:30.755Z",
   "albums": {
     "family": [
-      "images/family/1.png",
-      "images/family/20260212_153403.png",
-      "images/family/20260215_112253.png",
-      "images/family/IMG_0062.png",
-      "images/family/IMG_0326.png",
-      "images/family/IMG_0340.png",
-      "images/family/IMG_0549.png",
-      "images/family/IMG_0607.jpg",
-      "images/family/IMG_0859.jpg",
-      "images/family/IMG_1011.png"
+      "images/family/1.webp",
+      "images/family/20260212_153403.webp",
+      "images/family/20260215_112253.webp",
+      "images/family/IMG_0062.webp",
+      "images/family/IMG_0326.webp",
+      "images/family/IMG_0340.webp",
+      "images/family/IMG_0549.webp",
+      "images/family/IMG_0607.webp",
+      "images/family/IMG_0859.webp",
+      "images/family/IMG_1011.webp"
     ],
     "david": [
-      "images/david/1.jpg",
-      "images/david/IMG_0314.png"
+      "images/david/1.webp",
+      "images/david/IMG_0314.webp"
     ],
     "veronica": [
-      "images/veronica/20260210_183025.png",
-      "images/veronica/20260211_162625.png",
-      "images/veronica/IMG_0310.png",
-      "images/veronica/IMG_0343.png",
-      "images/veronica/IMG_2725.png"
+      "images/veronica/20260210_183025.webp",
+      "images/veronica/20260211_162625.webp",
+      "images/veronica/IMG_0310.webp",
+      "images/veronica/IMG_0343.webp",
+      "images/veronica/IMG_2725.webp"
     ],
     "mia": [
-      "images/mia/IMG_0530.png",
-      "images/mia/IMG_0576.png",
-      "images/mia/IMG_1014.png"
+      "images/mia/IMG_0530.webp",
+      "images/mia/IMG_0576.webp",
+      "images/mia/IMG_1014.webp"
     ],
     "thiago": [
-      "images/thiago/20260213_150248.png",
-      "images/thiago/20260213_151120.jpg"
+      "images/thiago/20260213_150248.webp",
+      "images/thiago/20260213_151120.webp"
     ],
     "luna": [
-      "images/luna/IMG_5954.jpg"
+      "images/luna/IMG_5954.webp"
     ]
   }
 }

@@ -9,6 +9,7 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const IMAGES_DIR = path.join(ROOT, "images");
 const ALBUMS = ["family", "david", "veronica", "mia", "thiago", "luna"];
+// images/_originals/ holds full-size sources; not an album
 const EXTENSIONS = new Set([
   ".jpg",
   ".jpeg",

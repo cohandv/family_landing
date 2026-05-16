@@ -5,6 +5,10 @@
     "prestart": "node scripts/generate-manifest.js",
     "start": "node scripts/dev-server.js",
     "manifest": "node scripts/generate-manifest.js",
+    "convert": "node scripts/convert-images.js && node scripts/generate-manifest.js",
     "start:docker": "bash start.sh"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }
