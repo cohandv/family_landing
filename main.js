@@ -39,6 +39,105 @@
     return typeof node === "string" ? node : "";
   }
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function carouselOptionsForMember(member) {
+    return {
+      variant: "member",
+      emptyLabel: t("carousel.empty"),
+      dotsLabel: t("carousel.dots").replace("{name}", member.name),
+      slideLabel: t("carousel.slide"),
+      prevLabel: t("carousel.prev"),
+      nextLabel: t("carousel.next"),
+    };
+  }
+
+  function renderFamilyCarousel() {
+    var host = document.getElementById("family-carousel-root");
+    if (!host || !window.FamilyCarousel) return;
+
+    host.innerHTML = window.FamilyCarousel.render(
+      window.FAMILY_CONFIG.albums.about,
+      t("about.photoAlt"),
+      {
+        variant: "hero",
+        priority: true,
+        emptyLabel: t("carousel.empty"),
+        dotsLabel: t("carousel.dotsFamily"),
+        slideLabel: t("carousel.slide"),
+        prevLabel: t("carousel.prev"),
+        nextLabel: t("carousel.next"),
+      }
+    );
+  }
+
+  function renderMembers() {
+    var root = document.getElementById("members-root");
+    if (!root || !window.FamilyCarousel) return;
+
+    if (memberObserver) {
+      memberObserver.disconnect();
+      memberObserver = null;
+    }
+
+    root.innerHTML = window.FAMILY_MEMBERS.map(function (member) {
+      var role = t("members." + member.id + ".role");
+      var eyebrow = t("members." + member.id + ".eyebrow");
+      var bio = t("members." + member.id + ".bio");
+      var alt = t("members." + member.id + ".alt");
+      var altClass = member.alternate ? " panel--alt" : "";
+      var socialsHtml = renderSocials(member);
+      var carouselHtml = window.FamilyCarousel.render(
+        member.album || member.id,
+        alt,
+        carouselOptionsForMember(member)
+      );
+
+      return (
+        '<article id="' +
+        member.id +
+        '" class="panel panel--member' +
+        altClass +
+        '" data-member>' +
+        '<div class="panel__inner panel__inner--member">' +
+        '<figure class="member-photo">' +
+        carouselHtml +
+        "</figure>" +
+        '<div class="member-copy">' +
+        '<p class="eyebrow">' +
+        escapeHtml(eyebrow) +
+        "</p>" +
+        '<h2 class="member-name">' +
+        escapeHtml(member.name) +
+        "</h2>" +
+        '<p class="member-role">' +
+        escapeHtml(role) +
+        "</p>" +
+        '<p class="body-text">' +
+        escapeHtml(bio) +
+        "</p>" +
+        socialsHtml +
+        "</div>" +
+        "</div>" +
+        "</article>"
+      );
+    }).join("");
+
+    initMemberReveal();
+  }
+
+  function initCarousels() {
+    if (window.FamilyCarousel) {
+      window.FamilyCarousel.initAll(document);
+    }
+  }
+
   function applyTranslations() {
     document.documentElement.lang = currentLang;
     document.title = t("meta.title");
@@ -46,11 +145,6 @@
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       var key = el.getAttribute("data-i18n");
       if (key) el.textContent = t(key);
-    });
-
-    document.querySelectorAll("[data-i18n-alt]").forEach(function (el) {
-      var key = el.getAttribute("data-i18n-alt");
-      if (key) el.setAttribute("alt", t(key));
     });
 
     var nav = document.getElementById("site-nav");
@@ -74,15 +168,9 @@
       btn.classList.toggle("is-active", active);
     });
 
+    renderFamilyCarousel();
     renderMembers();
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    initCarousels();
   }
 
   function renderSocials(member) {
@@ -110,73 +198,6 @@
       .join("");
 
     return '<ul class="socials" aria-label="' + escapeHtml(aria) + '">' + items + "</ul>";
-  }
-
-  function renderMembers() {
-    var root = document.getElementById("members-root");
-    if (!root) return;
-
-    if (memberObserver) {
-      memberObserver.disconnect();
-      memberObserver = null;
-    }
-
-    root.innerHTML = window.FAMILY_MEMBERS.map(function (member) {
-      var role = t("members." + member.id + ".role");
-      var eyebrow = t("members." + member.id + ".eyebrow");
-      var bio = t("members." + member.id + ".bio");
-      var alt = t("members." + member.id + ".alt");
-      var altClass = member.alternate ? " panel--alt" : "";
-      var socialsHtml = renderSocials(member);
-
-      return (
-        '<article id="' +
-        member.id +
-        '" class="panel panel--member' +
-        altClass +
-        '" data-member>' +
-        '<div class="panel__inner panel__inner--member">' +
-        '<figure class="member-photo">' +
-        '<img src="' +
-        escapeHtml(member.image) +
-        (member.imageFallback
-          ? '" data-fallback="' + escapeHtml(member.imageFallback)
-          : "") +
-        '" alt="' +
-        escapeHtml(alt) +
-        '" width="640" height="800" loading="lazy" />' +
-        "</figure>" +
-        '<div class="member-copy">' +
-        '<p class="eyebrow">' +
-        escapeHtml(eyebrow) +
-        "</p>" +
-        '<h2 class="member-name">' +
-        escapeHtml(member.name) +
-        "</h2>" +
-        '<p class="member-role">' +
-        escapeHtml(role) +
-        "</p>" +
-        '<p class="body-text">' +
-        escapeHtml(bio) +
-        "</p>" +
-        socialsHtml +
-        "</div>" +
-        "</div>" +
-        "</article>"
-      );
-    }).join("");
-
-    root.querySelectorAll("img[data-fallback]").forEach(function (img) {
-      img.addEventListener("error", function onError() {
-        var fallback = img.getAttribute("data-fallback");
-        if (fallback && img.src !== fallback) {
-          img.src = fallback;
-          img.removeEventListener("error", onError);
-        }
-      });
-    });
-
-    initMemberReveal();
   }
 
   function setLang(lang) {
@@ -224,8 +245,88 @@
     });
   }
 
+  function getScrollSections() {
+    var sections = [document.getElementById("about")];
+    window.FAMILY_MEMBERS.forEach(function (member) {
+      var el = document.getElementById(member.id);
+      if (el) sections.push(el);
+    });
+    return sections.filter(Boolean);
+  }
+
+  function getActiveSectionIndex(sections) {
+    var headerOffset =
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--header-h")
+      ) || 64;
+    var marker = window.scrollY + headerOffset + window.innerHeight * 0.35;
+    var active = 0;
+
+    sections.forEach(function (section, index) {
+      if (section.offsetTop <= marker) active = index;
+    });
+
+    return active;
+  }
+
+  function scrollToSection(sections, index) {
+    var target = sections[Math.max(0, Math.min(index, sections.length - 1))];
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function shouldHandleSectionKey(event) {
+    var tag = event.target && event.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return false;
+    if (event.target && event.target.isContentEditable) return false;
+    if (event.ctrlKey || event.metaKey || event.altKey) return false;
+    return true;
+  }
+
+  function initSectionNavigation() {
+    document.addEventListener("keydown", function (event) {
+      if (!shouldHandleSectionKey(event)) return;
+
+      var key = event.key;
+      var isNext = key === "ArrowDown" || key === "PageDown";
+      var isPrev = key === "ArrowUp" || key === "PageUp";
+
+      if (!isNext && !isPrev) return;
+
+      var sections = getScrollSections();
+      if (sections.length < 2) return;
+
+      var current = getActiveSectionIndex(sections);
+      var next = isNext ? current + 1 : current - 1;
+
+      if (next < 0 || next >= sections.length) return;
+
+      event.preventDefault();
+      scrollToSection(sections, next);
+    });
+  }
+
+  function loadManifest() {
+    return fetch("images/manifest.json", { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("manifest missing");
+        return res.json();
+      })
+      .then(function (data) {
+        window.FAMILY_IMAGE_MANIFEST = data;
+      })
+      .catch(function () {
+        window.FAMILY_IMAGE_MANIFEST = { albums: {} };
+        console.warn("images/manifest.json not found — run: node scripts/generate-manifest.js");
+      });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     initLangSwitcher();
-    applyTranslations();
+    initSectionNavigation();
+    loadManifest().then(function () {
+      applyTranslations();
+    });
   });
 })();

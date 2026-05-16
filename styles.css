@@ -23,6 +23,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -44,6 +45,10 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+.carousel__viewport img.carousel__slide {
+  max-width: 100%;
 }
 
 a {
@@ -176,11 +181,12 @@ a {
 /* Scroll snap main */
 .snap-main {
   padding-top: var(--header-h);
-  scroll-snap-type: y proximity;
 }
 
 .panel {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: var(--header-h);
   min-height: calc(100dvh - var(--header-h));
   display: flex;
   align-items: center;
@@ -219,22 +225,144 @@ a {
   }
 }
 
-.family-photo {
+.family-photo,
+.member-photo {
   margin: 0;
-  border-radius: 1rem;
+}
+
+/* Carousel */
+.carousel {
+  width: 100%;
+}
+
+.carousel__viewport {
+  position: relative;
   overflow: hidden;
-  background: var(--card);
+  border-radius: 1rem;
+  background: var(--bg);
   box-shadow:
     0 24px 48px -24px rgba(28, 25, 23, 0.35),
     0 0 0 1px var(--border);
+  touch-action: pan-y pinch-zoom;
+  outline: none;
+  width: 100%;
+  min-height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.family-photo img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  object-position: center 35%;
+.carousel__viewport:focus-visible {
+  box-shadow:
+    0 24px 48px -24px rgba(28, 25, 23, 0.35),
+    0 0 0 1px var(--border),
+    0 0 0 3px var(--accent);
 }
+
+.carousel__slide {
+  display: none;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  filter: none;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+.carousel__slide.is-active {
+  display: block;
+}
+
+.carousel__btn {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-top: -1.25rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.12);
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.2s var(--ease-out);
+}
+
+.carousel__btn:hover {
+  background: var(--card);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.carousel__btn--prev {
+  left: 0.65rem;
+}
+
+.carousel__btn--next {
+  right: 0.65rem;
+}
+
+.carousel__dots {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+  padding: 0;
+}
+
+.carousel__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink-muted);
+  opacity: 0.3;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.2s var(--ease-out),
+    background 0.2s;
+}
+
+.carousel__dot:hover {
+  opacity: 0.55;
+}
+
+.carousel__dot.is-active {
+  opacity: 1;
+  background: var(--accent);
+  transform: scale(1.15);
+}
+
+.carousel--empty .carousel__viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  aspect-ratio: auto;
+}
+
+.carousel__empty {
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
 
 .hero-copy {
   max-width: 40rem;
@@ -342,21 +470,6 @@ a {
 }
 
 /* Member */
-.member-photo {
-  margin: 0;
-  border-radius: 1rem;
-  overflow: hidden;
-  background: var(--card);
-  box-shadow:
-    0 24px 48px -24px rgba(28, 25, 23, 0.35),
-    0 0 0 1px var(--border);
-}
-
-.member-photo img {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-}
 
 .member-name {
   font-family: var(--font-display);
@@ -447,7 +560,6 @@ a {
   --reveal-o: 1;
 }
 
-[data-member] .member-photo,
 [data-member] .member-copy {
   opacity: var(--reveal-o);
   transform: translateY(var(--reveal-y));
@@ -456,12 +568,7 @@ a {
     transform 0.7s var(--ease-out);
 }
 
-[data-member] .member-copy {
-  transition-delay: 0.08s;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-member] .member-photo,
   [data-member] .member-copy {
     opacity: 1;
     transform: none;

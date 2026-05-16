@@ -3,6 +3,14 @@ window.FAMILY_I18N = {
     meta: { title: "Our Family" },
     logo: "Our Family",
     nav: { about: "About", aria: "Family sections" },
+    carousel: {
+      empty: "Add photos to this album folder",
+      dots: "Photos of {name}",
+      dotsFamily: "Family photos",
+      slide: "Photo",
+      prev: "Previous photo",
+      next: "Next photo",
+    },
     lang: {
       label: "Language",
       en: "English",
@@ -65,6 +73,14 @@ window.FAMILY_I18N = {
     meta: { title: "Nuestra familia" },
     logo: "Nuestra familia",
     nav: { about: "Nosotros", aria: "Secciones de la familia" },
+    carousel: {
+      empty: "Añade fotos a esta carpeta",
+      dots: "Fotos de {name}",
+      dotsFamily: "Fotos familiares",
+      slide: "Foto",
+      prev: "Foto anterior",
+      next: "Foto siguiente",
+    },
     lang: {
       label: "Idioma",
       en: "Inglés",

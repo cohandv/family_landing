@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-05-16T14:59:03.060Z",
+  "albums": {
+    "family": [
+      "images/family/1.png",
+      "images/family/20260212_153403.png",
+      "images/family/20260215_112253.png",
+      "images/family/IMG_0062.png",
+      "images/family/IMG_0326.png",
+      "images/family/IMG_0340.png",
+      "images/family/IMG_0549.png",
+      "images/family/IMG_0607.jpg",
+      "images/family/IMG_1011.png"
+    ],
+    "david": [
+      "images/david/1.jpg",
+      "images/david/IMG_0314.png"
+    ],
+    "veronica": [
+      "images/veronica/20260210_183025.png",
+      "images/veronica/20260211_162625.png",
+      "images/veronica/IMG_0310.png",
+      "images/veronica/IMG_0343.png",
+      "images/veronica/IMG_2725.png"
+    ],
+    "mia": [
+      "images/mia/IMG_0530.png",
+      "images/mia/IMG_0576.png",
+      "images/mia/IMG_1014.png"
+    ],
+    "thiago": [
+      "images/thiago/20260213_150248.png",
+      "images/thiago/20260213_151120.jpg"
+    ],
+    "luna": []
+  }
+}

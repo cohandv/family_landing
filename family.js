@@ -1,16 +1,18 @@
 /**
  * Order: David → Verónica → Mia → Thiago → Luna
- * Drop individual photos in images/ as david.jpg, veronica.jpg, etc.
+ * Photos: drop any images into images/{album}/ (see scripts/generate-manifest.js)
  */
 window.FAMILY_CONFIG = {
-  familyImage: "images/family.png",
+  albums: {
+    about: "family",
+  },
 };
 
 window.FAMILY_MEMBERS = [
   {
     id: "david",
     name: "David",
-    image: "images/david.jpg",
+    album: "david",
     alternate: false,
     socials: {
       linkedin: "#",
@@ -23,8 +25,7 @@ window.FAMILY_MEMBERS = [
   {
     id: "veronica",
     name: "Verónica",
-    image: "images/veronica.jpg",
-    imageFallback: "https://picsum.photos/seed/family-veronica/640/800",
+    album: "veronica",
     alternate: true,
     socials: {
       linkedin: "#",
@@ -37,8 +38,7 @@ window.FAMILY_MEMBERS = [
   {
     id: "mia",
     name: "Mia",
-    image: "images/mia.jpg",
-    imageFallback: "https://picsum.photos/seed/family-mia/640/800",
+    album: "mia",
     alternate: false,
     socials: {
       linkedin: "#",
@@ -51,8 +51,7 @@ window.FAMILY_MEMBERS = [
   {
     id: "thiago",
     name: "Thiago",
-    image: "images/thiago.jpg",
-    imageFallback: "https://picsum.photos/seed/family-thiago/640/800",
+    album: "thiago",
     alternate: true,
     socials: {
       linkedin: "#",
@@ -65,8 +64,7 @@ window.FAMILY_MEMBERS = [
   {
     id: "luna",
     name: "Luna",
-    image: "images/luna.jpg",
-    imageFallback: "https://picsum.photos/seed/family-luna/640/800",
+    album: "luna",
     alternate: false,
     socials: {
       instagram: "#",
